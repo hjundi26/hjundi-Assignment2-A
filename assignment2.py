@@ -3,11 +3,11 @@
 '''
 OPS445 Assignment 2
 Program: assignment2.py 
-Author: "Student Name"
-Semester: "Enter Winter/Summer/Fall Year"
+Author: Hussein Jundi-hjundi
+Semester: Fall 2024
 
 The python code in this file is original work written by
-"Student Name". No code in this file is copied from any other source 
+Hussein Jundi-hjundi. No code in this file is copied from any other source 
 except those provided by the course instructor, including any person, 
 textbook, or on-line resource. I have not shared this python script 
 with anyone or anything except for submission for grading.  
@@ -28,32 +28,60 @@ def parse_command_args() -> object:
     # add argument for "human-readable". USE -H, don't use -h! -h is reserved for --help which is created automatically.
     # check the docs for an argparse option to store this as a boolean.
     parser.add_argument("program", type=str, nargs='?', help="if a program is specified, show memory use of all associated processes. Show only total use is not.")
+    parser.add_argument('-H', "--human-readable", action="store_true", help="Display memory usage in a human-readable format.")
     args = parser.parse_args()
     return args
-# create argparse function
-# -H human readable
-# -r running only
+
 
 def percent_to_graph(percent: float, length: int=20) -> str:
+
     "turns a percent 0.0 - 1.0 into a bar graph"
-    ...
+    try:
+        if 0 < percent < 1.0:
+            pg = int(percent * length)
+            return ('#' * pg + ' ' * (length - pg))
+    except ValueError:
+        return("error, it has to be between 0.0 and 1.0")
+
 # percent to graph function
 
 def get_sys_mem() -> int:
     "return total system memory (used or available) in kB"
-    ...
+    with open ('/proc/meminfo', 'r') as s_mem:
+        for line in s_mem: 
+            if s_mem in line: 
+                m = int(line.split()[1])
+                return m
 
 def get_avail_mem() -> int:
     "return total memory that is available"
-    ...
+    with open ('/proc/meminfo', 'r') as a_mem:
+        for line in a_mem:
+            if a_mem in line:
+                fm = int(line.split()[1])
+                return fm
+
 
 def pids_of_prog(app_name: str) -> list:
     "given an app name, return all pids associated with app"
-    ...
+    
+    pof = os.popen('pofg ' + app_name).read().split()
+    if pof:
+        pof_list = pof.split()
+    else:
+        pof_list = []
+    return pof_list
 
 def rss_mem_of_pid(proc_id: str) -> int:
     "given a process id, return the resident memory used, zero if not found"
-    ...
+    try:
+        rms = open(f'/proc/{proc_id}/rms')
+        for line in rms:
+            if 'VmRSS' in line:
+                ts = int(line.split()[1])
+                return ts
+    except ValueError:
+        return 0
 
 def bytes_to_human_r(kibibytes: int, decimal_places: int=2) -> str:
     "turn 1,024 into 1 MiB, for example"
@@ -66,6 +94,7 @@ def bytes_to_human_r(kibibytes: int, decimal_places: int=2) -> str:
     str_result = f'{result:.{decimal_places}f} '
     str_result += suffixes[suf_count]
     return str_result
+
 
 if __name__ == "__main__":
     args = parse_command_args()
